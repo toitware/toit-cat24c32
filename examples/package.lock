@@ -1,0 +1,5 @@
+prefixes:
+  cat24c32: ..
+packages:
+  ..:
+    path: ..
