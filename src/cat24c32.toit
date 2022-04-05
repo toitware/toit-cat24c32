@@ -14,11 +14,13 @@ import i2c
 I2C_ADDRESS     ::= 0x50
 
 /**
-Driver for the CAT24C32 EEPROM
+Driver for the CAT24C32 EEPROM.
 */
 class Cat24c32:
 
+  /** Size in bytes. */
   static SIZE ::= 4096
+
   static MAX_WRITE_OFFLINE_US_ ::= 5_000
   static PAGE_SIZE_ ::= 32
   static PAGE_MASK_ ::= ~0x1F
@@ -45,24 +47,20 @@ class Cat24c32:
   /**
   Reads $size bytes starting at $address.
   The address must satisfy 0 <= $address <= $SIZE - $size.
-  For $size == 0, the address must also satisfy $address < $SIZE.
   */
   read address/int --size=1 -> ByteArray:
     if size < 0: throw "INVALID_ARGUMENT"
-    if not 0 <= address < 4096: throw "OUT_OF_RANGE"
+    if not 0 <= address << address + size <= SIZE: throw "OUT_OF_RANGE"
     if size == 0: return #[]
-    if not address + size <= 4096: throw "OUT_OF_RANGE"
     return try_: return device_.read_address #[ address >> 8, address & 0xFF ] size
 
   /**
   Writes the given $bytes starting at $address.
   The address must satisfy 0 <= $address <= $SIZE - ($bytes).size.
-  If the given $bytes is empty, then the address must also satisfy $address < $SIZE.
   */
   write address/int bytes/ByteArray -> none:
-    if not 0 <= address < 4096: throw "OUT_OF_RANGE"
+    if not 0 <= address << address + bytes.size <= SIZE: throw "OUT_OF_RANGE"
     if bytes.size == 0: return
-    if not address + bytes.size <= 4096: throw "OUT_OF_RANGE"
     // The device is split into pages of 32 bytes.
     // Never write across page boundaries. The device would just wrap around.
     if address & PAGE_MASK_ == (address + bytes.size - 1) & PAGE_MASK_:
