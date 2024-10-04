@@ -16,7 +16,7 @@ main:
     --sda=gpio.Pin 21
     --scl=gpio.Pin 22
 
-  device := bus.device cat24c32.I2C_ADDRESS
+  device := bus.device cat24c32.I2C-ADDRESS
   eeprom := cat24c32.Cat24c32 device
 
   eeprom[0] = 0x63
